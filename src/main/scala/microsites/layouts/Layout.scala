@@ -17,6 +17,7 @@
 package microsites.layouts
 
 import java.io.File
+import java.net.URI
 
 import microsites.MicrositeSettings
 import microsites.util.MicrositeHelper
@@ -574,6 +575,9 @@ abstract class Layout(config: MicrositeSettings) {
   private[this] def validFile(extension: String)(file: File): Boolean =
     file.getName.endsWith(s".$extension")
 
+  private[this] def concatNonemptyPathSegments(segments: String*): String =
+    new URI(segments.map(_.stripPrefix("/").stripSuffix("/")).filter(_.nonEmpty).mkString("/")).getPath()
+
   def ctaButton(linkClass: String): TypedTag[String] = {
     if (config.urlSettings.micrositeHomeButtonTarget == "repo") {
       a(
@@ -585,7 +589,7 @@ abstract class Layout(config: MicrositeSettings) {
       )
     } else {
       a(
-        href := s"/${config.urlSettings.micrositeBaseUrl}/${config.urlSettings.micrositeDocumentationUrl}",
+        href := concatNonemptyPathSegments(config.urlSettings.micrositeBaseUrl, config.urlSettings.micrositeDocumentationUrl),
         target := "_blank",
         rel    := "noopener noreferrer",
         cls    := linkClass,
